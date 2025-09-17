@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <clipPath id="rounded">
+      <rect width="1280" height="720" rx="48" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#rounded)">
+    <rect width="1280" height="720" fill="#00BED6" />
+    <path d="M0 440C220 340 430 280 640 280s420 60 640 160v280H0z" fill="#009FBE" opacity="0.45" />
+    <path d="M0 300C240 360 430 420 640 420s400-40 640-140V0H0z" fill="#2DD8EB" opacity="0.18" />
+    <circle cx="1080" cy="140" r="88" fill="none" stroke="rgba(255, 255, 255, 0.5)" stroke-width="4" />
+    <circle cx="160" cy="560" r="72" fill="none" stroke="rgba(255, 255, 255, 0.35)" stroke-width="4" />
+    <path d="M180 220l70-70M1090 600l80-80" stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="6" stroke-linecap="round" />
+    <rect width="1280" height="320" fill="#FFFFFF" opacity="0.12" />
+  </g>
+  <g fill="#FFFFFF" font-family="'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif">
+    <text x="136" y="286" font-size="68" font-weight="700">全屋漏水不用怕！</text>
+    <text x="136" y="366" font-size="48" font-weight="600">1 秒自動斷水防災裝置</text>
+    <text x="136" y="440" font-size="32" font-weight="500" opacity="0.85">點擊播放影片了解守護方法</text>
+  </g>
+</svg>

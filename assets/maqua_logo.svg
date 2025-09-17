@@ -1,0 +1,13 @@
+<svg width="996" height="432" viewBox="0 0 996 432" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="996" height="432" fill="#00BED6"/>
+  
+  <!-- 白色波浪形狀 -->
+  <path d="M399 190C399 190 450 240 520 240C590 240 640 190 640 190C640 190 690 240 760 240C830 240 880 190 880 190V290C880 290 830 340 760 340C690 340 640 290 640 290C640 290 590 340 520 340C450 340 399 290 399 290V190Z" fill="white" opacity="0.9"/>
+  
+  <!-- MAQUA 文字 -->
+  <text x="498" y="360" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white" letter-spacing="8px">MAQUA</text>
+  
+  <!-- 淨水管家 文字 -->
+  <text x="498" y="400" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="white" letter-spacing="4px">淨水管家</text>
+</svg>

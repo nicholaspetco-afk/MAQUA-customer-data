@@ -1,0 +1,15 @@
+<svg width="900" height="400" viewBox="0 0 900 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="400" fill="#00BED6"/>
+  
+  <!-- 上方波浪形狀 -->
+  <path d="M180 60C180 60 280 40 400 60C520 80 620 60 620 60L620 160C620 160 520 180 400 160C280 140 180 160 180 160V60Z" fill="white"/>
+  
+  <!-- 下方波浪形狀 -->
+  <path d="M280 180C280 180 380 160 500 180C620 200 720 180 720 180L720 280C720 280 620 300 500 280C380 260 280 280 280 280V180Z" fill="white"/>
+  
+  <!-- MAQUA 文字 -->
+  <text x="450" y="240" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="8px">MAQUA</text>
+  
+  <!-- 淨水管家 文字 -->
+  <text x="450" y="280" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" letter-spacing="4px">淨水管家</text>
+</svg>

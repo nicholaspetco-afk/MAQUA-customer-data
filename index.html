@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>上傳維修照片 - 客戶回訪報告</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 頁首：使用品牌色背景搭配標題文字 -->
+  <header class="header">
+    <h1 style="text-align:center; font-size:1.6rem; font-weight:700; padding:24px 0; margin:0;">客戶回訪報告生成</h1>
+  </header>
+  <main class="container">
+    <section class="card upload-section">
+      <h2 class="section-title">上傳維修紀錄照片</h2>
+      <p>請選擇一或多張維修紀錄照片，我們會為您生成專屬回訪報告。</p>
+      <!-- 選擇本次與下次保養日期 -->
+      <div class="date-stack">
+        <label for="serviceDate" class="field-label">本次保養日期：</label>
+        <input type="date" id="serviceDate" class="date-input">
+      </div>
+      <div class="date-stack">
+        <label for="nextDate" class="field-label">下次保養日期：</label>
+        <input type="date" id="nextDate" class="date-input">
+      </div>
+      <!-- 隱藏原生檔案輸入框，改用自訂樣式的按鈕觸發檔案選取 -->
+      <input type="file" id="fileInput" class="file-input" accept="image/*" multiple hidden>
+      <label for="fileInput" class="upload-btn">選擇照片</label>
+      <div id="preview" class="preview"></div>
+      <button id="generateBtn">生成報告</button>
+    </section>
+  </main>
+  <script>
+    // 預覽選取的照片
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    fileInput.addEventListener('change', () => {
+      preview.innerHTML = '';
+      const files = fileInput.files;
+      if (!files || files.length === 0) return;
+      for (const file of files) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    /**
+     * 壓縮圖片至最大尺寸 1024 像素，並返回壓縮後的 Data URL
+     * @param {File} file 檔案
+     * @returns {Promise<string>}
+     */
+    function compressImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 1024;
+            let { width, height } = img;
+            if (width > height) {
+              if (width > maxDim) {
+                height = (height * maxDim) / width;
+                width = maxDim;
+              }
+            } else {
+              if (height > maxDim) {
+                width = (width * maxDim) / height;
+                height = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL('image/jpeg', 0.8);
+            resolve(compressed);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    /**
+     * 將 Data URL 轉為 Blob，用於上傳
+     * @param {string} dataUrl
+     * @returns {Promise<Blob>}
+     */
+    function dataURLToBlob(dataUrl) {
+      return fetch(dataUrl).then(res => res.blob());
+    }
+
+    // Cloudinary 設定：請使用您自己的帳戶名稱與 unsigned preset
+    const CLOUD_NAME = 'djw2gafqe';
+    const UPLOAD_PRESET = 'customer_reports';
+
+    // 處理生成報告
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      const files = fileInput.files;
+      if (!files || files.length === 0) {
+        alert('請先選擇照片！');
+        return;
+      }
+      try {
+        const ids = [];
+        for (let i = 0; i < files.length; i++) {
+          const compressedDataUrl = await compressImage(files[i]);
+          const blob = await dataURLToBlob(compressedDataUrl);
+          const formData = new FormData();
+          formData.append('file', blob, files[i].name);
+          formData.append('upload_preset', UPLOAD_PRESET);
+          const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: formData
+          });
+          if (!response.ok) {
+            throw new Error('上傳圖片失敗');
+          }
+          const result = await response.json();
+          ids.push(result.public_id);
+        }
+        // 取得本次與下次保養日期
+        const serviceDateInput = document.getElementById('serviceDate');
+        const nextDateInput = document.getElementById('nextDate');
+        const serviceDateValue = serviceDateInput && serviceDateInput.value ? serviceDateInput.value : '';
+        const nextDateValue = nextDateInput && nextDateInput.value ? nextDateInput.value : '';
+        // 組成查詢字串
+        const paramIds = encodeURIComponent(ids.join(','));
+        let url = 'report.html?ids=' + paramIds;
+        if (serviceDateValue) {
+          url += '&serviceDate=' + encodeURIComponent(serviceDateValue);
+        }
+        if (nextDateValue) {
+          url += '&date=' + encodeURIComponent(nextDateValue);
+        }
+        // 導向至報告頁面
+        window.location.href = url;
+      } catch (err) {
+        console.error(err);
+        alert('處理或上傳圖片資料時發生錯誤，請稍後再試。');
+      }
+    });
+  </script>
+</body>
+</html>

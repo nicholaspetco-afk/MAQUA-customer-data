@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <clipPath id="rounded">
+      <rect width="1280" height="720" rx="48" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#rounded)">
+    <rect width="1280" height="720" fill="#00BED6" />
+    <path d="M0 520c210-80 420-120 640-120s430 40 640 120v200H0z" fill="#009FBE" opacity="0.42" />
+    <path d="M0 0h1280v260C1050 200 840 160 640 160S240 200 0 300z" fill="#2DD8EB" opacity="0.2" />
+    <circle cx="1040" cy="170" r="76" fill="none" stroke="rgba(255, 255, 255, 0.45)" stroke-width="4" />
+    <circle cx="220" cy="570" r="64" fill="none" stroke="rgba(255, 255, 255, 0.35)" stroke-width="4" />
+    <path d="M220 210l64-64M1060 560l74-74" stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="6" stroke-linecap="round" />
+    <rect width="1280" height="320" fill="#FFFFFF" opacity="0.12" />
+  </g>
+  <g fill="#FFFFFF" font-family="'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif">
+    <text x="140" y="286" font-size="68" font-weight="700">家裡突然斷水？</text>
+    <text x="140" y="366" font-size="48" font-weight="600">教你 3 步快速恢復用水</text>
+    <text x="140" y="440" font-size="32" font-weight="500" opacity="0.85">先看影片，遇到狀況就不慌</text>
+  </g>
+</svg>
