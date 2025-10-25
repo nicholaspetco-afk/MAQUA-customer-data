@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAQUA 會員專區</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='members.css') }}">
+</head>
+<body class="auth-locked">
+  <div id="authGate" class="auth-gate">
+    <div class="auth-card">
+      <h2 class="auth-title">MAQUA 安全驗證</h2>
+      <p class="auth-desc">請輸入訪問密碼以開啟會員資料。</p>
+      <form id="authForm" class="auth-form">
+        <input id="authInput" class="auth-input" type="password" placeholder="輸入密碼" autocomplete="off" required>
+        <button type="submit" class="auth-btn">解鎖</button>
+      </form>
+      <p id="authError" class="auth-error" hidden>密碼錯誤，請再試一次。</p>
+    </div>
+  </div>
+
+  <header class="member-header">
+    <div class="member-hero">
+      <p class="member-kicker">MAQUA Membership</p>
+      <h1 class="member-title">會員專屬保養資訊</h1>
+      <p class="member-subtitle">輸入客戶編碼、電話或姓名，快速掌握保養日期、合約與月費方案。</p>
+    </div>
+  </header>
+
+  <main class="member-container">
+    <section class="member-card">
+      <form id="memberForm" class="member-form">
+        <label class="member-label" for="memberInput">客戶編碼 / 聯絡電話 / 姓名</label>
+        <div class="member-field">
+          <input id="memberInput" class="member-input" placeholder="例如：C3770、66851573 或 李小姐" autocomplete="off" required>
+          <button type="submit" class="member-btn">查詢</button>
+        </div>
+        <p class="member-hint">* 可輸入客戶編碼、電話或姓名，系統會帶出符合條件的保養紀錄與客戶資料。</p>
+      </form>
+      <div id="memberStatus" class="member-status"></div>
+      <div id="memberSuggestions" class="member-suggestions" hidden></div>
+    </section>
+
+    <section id="memberResult" class="member-card result-card" hidden>
+      <div class="result-header">
+        <div>
+          <p class="result-label">會員名稱</p>
+          <h2 id="resultName" class="result-title">—</h2>
+        </div>
+        <div class="result-meta">
+          <span class="meta-item">
+            <span class="meta-label">客戶編碼</span>
+            <span id="resultCode">—</span>
+          </span>
+          <span class="meta-item">
+            <span class="meta-label">輸入關鍵字</span>
+            <span id="resultKeyword">—</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <article class="info-card contract-card">
+          <h3>保養排程</h3>
+          <div class="info-content">
+            <div class="info-line">
+              <span class="info-label">下次保養</span>
+              <span id="resultNext" class="info-value">—</span>
+            </div>
+            <div class="info-line">
+              <span class="info-label">最近一次</span>
+              <span id="resultLatest" class="info-value">—</span>
+            </div>
+            <div class="info-line">
+              <span class="info-label">付款情況</span>
+              <span id="resultPaymentStatus" class="info-value">—</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="info-card">
+          <h3>合約與方案</h3>
+          <div class="info-content">
+            <div class="info-line">
+              <span class="info-label">合約編號</span>
+              <span id="resultContract" class="info-value">—</span>
+            </div>
+            <div class="info-line" id="planSummaryRow">
+              <span class="info-label">方案類型</span>
+              <span id="resultPlan" class="info-value">—</span>
+            </div>
+            <div id="planList" class="plan-list"></div>
+            <div class="info-line">
+              <span class="info-label">使用方式</span>
+              <span id="resultUsage" class="info-value">—</span>
+            </div>
+            <div class="info-line">
+              <span class="info-label">月費金額</span>
+              <span id="resultFee" class="info-value">—</span>
+            </div>
+            <div class="info-line">
+              <span class="info-label">付費方式</span>
+              <span id="resultPayment" class="info-value">—</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="info-card">
+          <h3>聯絡資訊</h3>
+          <div class="info-content">
+            <div class="info-line">
+              <span class="info-label">聯絡人</span>
+              <span id="resultContact" class="info-value">—</span>
+            </div>
+            <div class="info-line">
+              <span class="info-label">電話</span>
+              <span id="resultPhone" class="info-value">—</span>
+            </div>
+            <div class="info-line">
+              <span class="info-label">預設地址</span>
+              <span id="resultAddress" class="info-value">—</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <div id="planModal" class="plan-modal" hidden>
+    <div class="plan-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="planModalTitle">
+      <button type="button" id="planModalClose" class="plan-modal-close" aria-label="關閉">×</button>
+      <div class="plan-detail-header" id="planModalHeader">
+        <span id="planModalTitle">—</span>
+      </div>
+      <dl id="planModalBody" class="plan-detail-body"></dl>
+      <div id="planModalLink" class="plan-detail-link-container" hidden>
+        <a id="planModalLinkAnchor" class="plan-detail-link" href="#" target="_blank" rel="noopener">前往商機頁面</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="member-footer">
+    <p>MAQUA · 你的專屬淨水管家</p>
+  </footer>
+
+  <script>
+    const AUTH_PASSWORD = 'maqua28453792';
+    const AUTH_STORAGE_KEY = 'maqua-auth-status';
+
+    const authGate = document.getElementById('authGate');
+    const authForm = document.getElementById('authForm');
+    const authInput = document.getElementById('authInput');
+    const authError = document.getElementById('authError');
+
+    const form = document.getElementById('memberForm');
+    const input = document.getElementById('memberInput');
+    const statusEl = document.getElementById('memberStatus');
+    const suggestionList = document.getElementById('memberSuggestions');
+    const resultSection = document.getElementById('memberResult');
+
+    const resultName = document.getElementById('resultName');
+    const resultCode = document.getElementById('resultCode');
+    const resultKeyword = document.getElementById('resultKeyword');
+    const resultLatest = document.getElementById('resultLatest');
+    const resultNext = document.getElementById('resultNext');
+    const resultContract = document.getElementById('resultContract');
+    const resultPlan = document.getElementById('resultPlan');
+    const resultUsage = document.getElementById('resultUsage');
+    const resultFee = document.getElementById('resultFee');
+    const resultPayment = document.getElementById('resultPayment');
+    const resultPaymentStatus = document.getElementById('resultPaymentStatus');
+    const planSummaryRow = document.getElementById('planSummaryRow');
+    const planListEl = document.getElementById('planList');
+    const planModal = document.getElementById('planModal');
+    const planModalHeader = document.getElementById('planModalHeader');
+    const planModalTitle = document.getElementById('planModalTitle');
+    const planModalBody = document.getElementById('planModalBody');
+    const planModalLink = document.getElementById('planModalLink');
+    const planModalLinkAnchor = document.getElementById('planModalLinkAnchor');
+    const planModalClose = document.getElementById('planModalClose');
+    const resultAddress = document.getElementById('resultAddress');
+    const resultContact = document.getElementById('resultContact');
+    const resultPhone = document.getElementById('resultPhone');
+
+    let fallbackPlanSummary = '—';
+    let activePlanIndex = null;
+    let authUnlocked = false;
+
+    function unlockApplication() {
+      if (authUnlocked) {
+        return;
+      }
+      authUnlocked = true;
+      sessionStorage.setItem(AUTH_STORAGE_KEY, '1');
+      document.body.classList.remove('auth-locked');
+      if (authGate) {
+        authGate.style.display = 'none';
+        authGate.setAttribute('aria-hidden', 'true');
+      }
+      if (authError) {
+        authError.hidden = true;
+      }
+      if (authInput) {
+        authInput.value = '';
+      }
+      if (input) {
+        setTimeout(() => input.focus(), 50);
+      }
+    }
+
+    if (sessionStorage.getItem(AUTH_STORAGE_KEY) === '1') {
+      unlockApplication();
+    } else if (authInput) {
+      setTimeout(() => authInput.focus(), 100);
+    }
+
+    if (authForm) {
+      authForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (authUnlocked) {
+          return;
+        }
+        const value = (authInput && authInput.value ? authInput.value : '').trim();
+        if (value === AUTH_PASSWORD) {
+          unlockApplication();
+        } else {
+          if (authError) {
+            authError.hidden = false;
+          }
+          if (authInput) {
+            authInput.value = '';
+            authInput.focus();
+          }
+        }
+      });
+    }
+
+    function renderSuggestions(matches) {
+      if (!suggestionList) {
+        return;
+      }
+      suggestionList.innerHTML = '';
+      if (!Array.isArray(matches) || matches.length === 0) {
+        suggestionList.hidden = true;
+        return;
+      }
+
+      matches.forEach((match) => {
+        if (!match || typeof match !== 'object') {
+          return;
+        }
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'suggestion-item';
+
+        const primary = document.createElement('span');
+        primary.className = 'suggestion-primary';
+        primary.textContent = match.name || match.code || '未命名客戶';
+        button.appendChild(primary);
+
+        const metaParts = [];
+        if (match.code) {
+          metaParts.push(match.code);
+        }
+        if (match.phone) {
+          metaParts.push(match.phone);
+        }
+        if (metaParts.length > 0) {
+          const meta = document.createElement('span');
+          meta.className = 'suggestion-meta';
+          meta.textContent = metaParts.join(' · ');
+          button.appendChild(meta);
+        }
+
+        button.addEventListener('click', () => {
+          if (!match.code) {
+            return;
+          }
+          input.value = match.code;
+          renderSuggestions([]);
+          if (statusEl) {
+            statusEl.textContent = `正在查詢 ${match.code}…`;
+          }
+          resultSection.hidden = true;
+          fallbackPlanSummary = '—';
+          renderPlans([]);
+          if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
+          } else {
+            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+          }
+        });
+
+        suggestionList.appendChild(button);
+      });
+
+      suggestionList.hidden = false;
+    }
+
+    function hidePlanModal() {
+      if (!planModal || planModal.hasAttribute('hidden')) {
+        return;
+      }
+      planModal.classList.remove('open');
+      planModal.setAttribute('hidden', 'hidden');
+      planModalBody.innerHTML = '';
+      planModalLink.hidden = true;
+      if (planModalHeader) {
+        planModalHeader.hidden = true;
+      }
+      if (planModalTitle) {
+        planModalTitle.textContent = '';
+      }
+      if (activePlanIndex !== null) {
+        const chips = planListEl.querySelectorAll('.plan-chip');
+        const activeChip = chips[activePlanIndex];
+        if (activeChip && typeof activeChip.focus === 'function') {
+          activeChip.focus({ preventScroll: true });
+        }
+      }
+    }
+
+    function openPlanModal(plan) {
+      if (!planModal || !plan) {
+        return;
+      }
+
+      const detailItems = Array.isArray(plan.details)
+        ? plan.details.filter((item) => item && item.value)
+        : [];
+      const preferredLabels = [
+        '合約編號',
+        '方案類型',
+        '使用方式',
+        '付費方式',
+        '月費金額',
+        '合約開始日',
+        '合約結束日',
+        '合約年期',
+        '預計簽單金額',
+      ];
+      const secondaryLabels = [
+        '商機階段',
+        '方案負責人',
+        '交易類型',
+        '安裝位置',
+      ];
+      const filtered = [];
+      const seen = new Set();
+
+      function appendByLabels(labels) {
+        labels.forEach((label) => {
+          detailItems.forEach((item) => {
+            if (item.label === label) {
+              const key = `${item.label}::${item.value}`;
+              if (!seen.has(key)) {
+                filtered.push(item);
+                seen.add(key);
+              }
+            }
+          });
+        });
+      }
+
+      appendByLabels(preferredLabels);
+
+      const monthlyFromPlan = plan.monthlyFee;
+      const monthlyDisplay = monthlyFromPlan && monthlyFromPlan !== '—'
+        ? String(monthlyFromPlan).trim()
+        : '';
+      if (monthlyDisplay) {
+        const monthlyKey = `月費金額::${monthlyDisplay}`;
+        if (!seen.has(monthlyKey)) {
+          filtered.splice(Math.min(2, filtered.length), 0, { label: '月費金額', value: monthlyDisplay });
+          seen.add(monthlyKey);
+        }
+      }
+
+      appendByLabels(secondaryLabels);
+
+      const itemsToRender = filtered.length > 0 ? filtered : detailItems;
+
+      if (itemsToRender.length === 0 && !plan.detailUrl) {
+        return;
+      }
+
+      if (planModalHeader) {
+        planModalHeader.hidden = true;
+      }
+      if (planModalTitle) {
+        planModalTitle.textContent = '';
+      }
+      planModalBody.innerHTML = '';
+
+      itemsToRender.forEach((item) => {
+        const dt = document.createElement('dt');
+        dt.textContent = item.label || '項目';
+        const dd = document.createElement('dd');
+        dd.textContent = item.value;
+        planModalBody.appendChild(dt);
+        planModalBody.appendChild(dd);
+      });
+
+      if (plan.detailUrl) {
+        planModalLinkAnchor.href = plan.detailUrl;
+        planModalLink.hidden = false;
+      } else {
+        planModalLink.hidden = true;
+      }
+
+      planModal.removeAttribute('hidden');
+      requestAnimationFrame(() => {
+        planModal.classList.add('open');
+        if (planModalClose && typeof planModalClose.focus === 'function') {
+          planModalClose.focus({ preventScroll: true });
+        }
+      });
+    }
+
+    function renderPlans(plans) {
+      planListEl.innerHTML = '';
+      hidePlanModal();
+      activePlanIndex = null;
+
+      if (!Array.isArray(plans) || plans.length === 0) {
+        if (planSummaryRow) {
+          planSummaryRow.hidden = false;
+        }
+        resultPlan.textContent = fallbackPlanSummary;
+        return;
+      }
+
+    plans.forEach((plan, index) => {
+        const label = plan.title || plan.summary || `方案 ${index + 1}`;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'plan-chip';
+        button.textContent = label;
+        button.addEventListener('click', () => showPlanDetail(plans, index));
+        planListEl.appendChild(button);
+      });
+    }
+
+
+    function showPlanDetail(plans, selectedIndex) {
+      if (!Array.isArray(plans) || !plans[selectedIndex]) {
+        return;
+      }
+
+      activePlanIndex = selectedIndex;
+
+      planListEl.querySelectorAll('.plan-chip').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === selectedIndex);
+      });
+
+      openPlanModal(plans[selectedIndex]);
+    }
+
+    if (planModal) {
+      planModal.addEventListener('click', (event) => {
+        if (event.target === planModal) {
+          hidePlanModal();
+        }
+      });
+    }
+    if (planModalClose) {
+      planModalClose.addEventListener('click', hidePlanModal);
+    }
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        hidePlanModal();
+      }
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const keyword = input.value.trim();
+      if (!keyword) {
+        statusEl.textContent = '請輸入資訊後查詢。';
+        renderSuggestions([]);
+        return;
+      }
+
+      resultSection.hidden = true;
+      fallbackPlanSummary = '—';
+      renderPlans([]);
+      resultPaymentStatus.textContent = '—';
+      renderSuggestions([]);
+      statusEl.textContent = '查詢中，請稍候…';
+
+      try {
+        const response = await fetch('{{ url_for('profile_api') }}', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier: keyword })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({ message: '查詢失敗' }));
+          statusEl.textContent = err.message || '查詢失敗，請稍後再試。';
+          renderSuggestions([]);
+          renderPlans([]);
+          return;
+        }
+
+        const data = await response.json();
+        if (data.code === 'CHOICES') {
+          renderPlans([]);
+          resultSection.hidden = true;
+          renderSuggestions(data.matches || []);
+          statusEl.textContent = data.message || '找到多個符合的客戶，請點選以下客戶。';
+          return;
+        }
+
+        const profile = data.profile || {};
+
+        resultName.textContent = profile.customerName || '—';
+        resultCode.textContent = profile.customerCode || '—';
+        resultKeyword.textContent = profile.keyword || keyword;
+        resultNext.textContent = profile.nextServiceDate || '—';
+        resultLatest.textContent = profile.latestServiceDate || '—';
+        resultContract.textContent = profile.contractNumber || '—';
+        fallbackPlanSummary = profile.planType || '—';
+        resultPlan.textContent = fallbackPlanSummary;
+        resultUsage.textContent = profile.usage || '—';
+        resultFee.textContent = profile.monthlyFee || '—';
+        resultPaymentStatus.textContent = profile.paymentStatus || '—';
+        resultPayment.textContent = profile.paymentMethod || '—';
+        resultAddress.textContent = profile.address || '—';
+        const resolvedContact = (profile.contact && profile.contact.name) || profile.customerName;
+        resultContact.textContent = resolvedContact || '—';
+        resultPhone.textContent = (profile.contact && profile.contact.phone) || '—';
+        const plans = Array.isArray(profile.plans) ? profile.plans : [];
+        renderPlans(plans);
+
+        resultSection.hidden = false;
+        statusEl.textContent = '';
+        renderSuggestions([]);
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = '查詢時發生錯誤，請稍後再試。';
+        fallbackPlanSummary = '—';
+        renderPlans([]);
+        resultPaymentStatus.textContent = '—';
+        renderSuggestions([]);
+      }
+    });
+  </script>
+</body>
+</html>
