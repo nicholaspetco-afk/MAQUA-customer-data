@@ -1,0 +1,3 @@
+Flask==2.3.2
+Flask-Cors
+requests==2.31.0
